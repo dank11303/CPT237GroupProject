@@ -109,6 +109,17 @@ public class QueensUI extends Application {
             renderSymbols();
         });
 
+        //check puzzle button that will check if the puzzle is complete or not
+        Button checkState = new Button("Check Puzzle");
+        checkState.setOnAction(e ->
+        {
+            Logic logic = new Logic(this);
+            logic.checkGameState();
+        });
+
+        //label that will show up under the button to return game state
+        Label gameState = new Label("Not Checked");
+
         //horizontal box that will act as a header for the program.
         HBox topBar = new HBox(12, title, levelPicker, clear);
         topBar.setAlignment(Pos.CENTER_LEFT);
@@ -119,7 +130,7 @@ public class QueensUI extends Application {
         renderLevel(currentLevel);
 
         //setting the header and gameplay area into a pane
-        VBox root = new VBox(10, topBar, board);
+        VBox root = new VBox(10, topBar, board, checkState, gameState);
         root.setPadding(new Insets(10));
 
         //setting the scene for display
