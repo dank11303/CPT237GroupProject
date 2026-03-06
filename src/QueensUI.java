@@ -17,7 +17,7 @@ public class QueensUI extends Application {
 
     // levels[level][row][col] = region/color id
     static final int[][][] LEVELS = {
-            { // Level 1 (example)
+            { // Level 1 (level 7 in Medium folder)
                     {0,0,0,0,0,1,1,1},
                     {0,2,0,0,0,0,1,1},
                     {0,2,2,0,1,1,1,1},
@@ -27,7 +27,7 @@ public class QueensUI extends Application {
                     {3,3,4,4,4,6,5,5},
                     {3,3,3,4,7,7,7,5}
             },
-            { // Level 2 (placeholder example)
+            { // Level 2 (level 6 in Medium)
                     {0,0,0,0,0,0,0,0},
                     {0,0,0,1,0,0,0,2},
                     {0,0,3,1,1,0,0,2},
@@ -37,13 +37,31 @@ public class QueensUI extends Application {
                     {6,6,6,7,7,7,7,2},
                     {6,6,7,7,7,7,7,7}
             }
-    };
+    };//end level array
 
     // solutions[level][row][col] = 1 means queen belongs here (optional for later)
     static final int[][][] SOLUTIONS = {
-            new int[N][N], // Level 1 solution placeholder
-            new int[N][N]  // Level 2 solution placeholder
-    };
+            { // Level 1 (level 7 in Medium folder)
+                    {0,0,0,0,0,1,0,0},
+                    {0,0,0,0,0,0,0,1},
+                    {0,0,0,0,1,0,0,0},
+                    {0,1,0,0,0,0,0,0},
+                    {0,0,0,1,0,0,0,0},
+                    {1,0,0,0,0,0,0,0},
+                    {0,0,1,0,0,0,0,0},
+                    {0,0,0,0,0,0,1,0}
+            },
+            { // Level 2 (level 6 in Medium)
+                    {0,1,0,0,0,0,0,0},
+                    {0,0,0,0,0,0,1,0},
+                    {0,0,1,0,0,0,0,0},
+                    {1,0,0,0,0,0,0,0},
+                    {0,0,0,1,0,0,0,0},
+                    {0,0,0,0,0,1,0,0},
+                    {0,0,0,0,0,0,0,1},
+                    {0,0,0,0,1,0,0,0}
+            } // Level 2 solution placeholder
+    };//end solution array
 
     //array to pre-define colors
     static final Color[] PALETTE = {
