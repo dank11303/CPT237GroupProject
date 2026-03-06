@@ -1,3 +1,4 @@
+package src;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -86,6 +87,8 @@ public class QueensUI extends Application {
 
     @Override
     public void start(Stage stage) {
+        //create logic object and pass "this" to it
+        Logic gameLogic = new Logic(this);
         Label title = new Label("Queens");
         title.setFont(Font.font(24));
 
@@ -204,6 +207,12 @@ public class QueensUI extends Application {
                 //reset the symbol in the grid
                 userState[r][c] = 0;
     }//end clearUserState()
+
+    //getter to be able to access the user state in different files
+    public int[][] getUserState()
+    {
+        return userState;
+    }
 
     //for IDEs that need this stuff
     public static void main(String[] args) {
