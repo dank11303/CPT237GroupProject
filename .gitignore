@@ -1,3 +1,10 @@
+#IDE specific directories that seem to not matter to the main branch
+/.idea/
+/out/
+
+#iml file
+*.iml
+
 # Compiled class file
 *.class
 
