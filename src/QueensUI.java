@@ -1,3 +1,4 @@
+package src;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -17,33 +18,51 @@ public class QueensUI extends Application {
 
     // levels[level][row][col] = region/color id
     static final int[][][] LEVELS = {
-            { // Level 1 (example)
-                    {0,0,0,1,1,2,2,3},
-                    {0,4,4,1,5,5,2,3},
-                    {0,4,4,1,5,5,6,3},
-                    {7,7,4,1,1,5,6,6},
-                    {7,7,8,8,1,5,6,6},
-                    {7,7,8,8,8,5,6,6},
-                    {7,7,8,8,8,8,6,6},
-                    {7,7,8,8,8,8,6,6}
+            { // Level 1 (level 7 in Medium folder)
+                    {0,0,0,0,0,1,1,1},
+                    {0,2,0,0,0,0,1,1},
+                    {0,2,2,0,1,1,1,1},
+                    {3,3,2,2,1,1,4,1},
+                    {3,3,2,4,4,4,4,4},
+                    {3,3,3,4,6,6,4,4},
+                    {3,3,4,4,4,6,5,5},
+                    {3,3,3,4,7,7,7,5}
             },
-            { // Level 2 (placeholder example)
-                    {1,1,1,1,2,2,2,2},
-                    {1,0,0,1,2,3,3,2},
-                    {1,0,0,1,2,3,3,2},
-                    {4,4,4,4,5,5,5,5},
-                    {4,6,6,4,5,7,7,5},
-                    {4,6,6,4,5,7,7,5},
-                    {8,8,8,8,9,9,9,9},
-                    {8,8,8,8,9,9,9,9}
+            { // Level 2 (level 6 in Medium)
+                    {0,0,0,0,0,0,0,0},
+                    {0,0,0,1,0,0,0,2},
+                    {0,0,3,1,1,0,0,2},
+                    {3,3,3,3,1,2,2,2},
+                    {4,4,5,5,7,2,2,2},
+                    {4,4,6,7,7,2,7,2},
+                    {6,6,6,7,7,7,7,2},
+                    {6,6,7,7,7,7,7,7}
             }
-    };
+    };//end level array
 
     // solutions[level][row][col] = 1 means queen belongs here (optional for later)
     static final int[][][] SOLUTIONS = {
-            new int[N][N], // Level 1 solution placeholder
-            new int[N][N]  // Level 2 solution placeholder
-    };
+            { // Level 2 (level 6 in Medium)
+                    {0,1,0,0,0,0,0,0},
+                    {0,0,0,0,0,0,1,0},
+                    {0,0,1,0,0,0,0,0},
+                    {1,0,0,0,0,0,0,0},
+                    {0,0,0,1,0,0,0,0},
+                    {0,0,0,0,0,1,0,0},
+                    {0,0,0,0,0,0,0,1},
+                    {0,0,0,0,1,0,0,0}
+            }, // Level 2 solution placeholder
+            { // Level 1 (level 7 in Medium folder)
+                    {0,0,0,0,0,1,0,0},
+                    {0,0,0,0,0,0,0,1},
+                    {0,0,0,0,1,0,0,0},
+                    {0,1,0,0,0,0,0,0},
+                    {0,0,0,1,0,0,0,0},
+                    {1,0,0,0,0,0,0,0},
+                    {0,0,1,0,0,0,0,0},
+                    {0,0,0,0,0,0,1,0}
+            }
+    };//end solution array
 
     //array to pre-define colors
     static final Color[] PALETTE = {
@@ -68,14 +87,35 @@ public class QueensUI extends Application {
 
     @Override
     public void start(Stage stage) {
+        //create logic object and pass "this" to it
+        Logic gameLogic = new Logic(this);
         Label title = new Label("Queens");
         title.setFont(Font.font(24));
+
+        //label that will show up under the button to return game state
+        Label puzzleCompleted = new Label("Not Checked");
+
+        //check puzzle button that will check if the puzzle is complete or not
+        Button checkState = new Button("Check Puzzle");
+        checkState.setOnAction(e ->
+        {
+            Logic logic = new Logic(this);
+            if (logic.checkGameState() == true)
+            {
+                puzzleCompleted.setText("The puzzle is correct!");
+            }
+            else
+            {
+                puzzleCompleted.setText("The puzzle is incorrect or incomplete!");
+            }
+        });
 
         //combo box that allows you to switch between levels.
         ComboBox<String> levelPicker = new ComboBox<>();
         for (int i = 0; i < LEVELS.length; i++) levelPicker.getItems().add("Level " + (i + 1));
         levelPicker.getSelectionModel().select(0);
         levelPicker.setOnAction(e -> {
+            puzzleCompleted.setText("Not Checked");
             currentLevel = levelPicker.getSelectionModel().getSelectedIndex();
             clearUserState();
             renderLevel(currentLevel);
@@ -84,6 +124,7 @@ public class QueensUI extends Application {
         //clear button that calls functions that will reset the game state
         Button clear = new Button("Clear Marks");
         clear.setOnAction(e -> {
+            puzzleCompleted.setText("Not Checked");
             clearUserState();
             renderSymbols();
         });
@@ -98,7 +139,7 @@ public class QueensUI extends Application {
         renderLevel(currentLevel);
 
         //setting the header and gameplay area into a pane
-        VBox root = new VBox(10, topBar, board);
+        VBox root = new VBox(10, topBar, board, checkState, puzzleCompleted);
         root.setPadding(new Insets(10));
 
         //setting the scene for display
@@ -186,6 +227,19 @@ public class QueensUI extends Application {
                 //reset the symbol in the grid
                 userState[r][c] = 0;
     }//end clearUserState()
+
+    //getter to be able to access the user state in different files
+    public int[][] getUserState()
+    {
+        return userState;
+    }
+
+    //getter for the current solution
+    public int[][] getSolution()
+    {
+        //return the proper array depending on the selected level
+        return SOLUTIONS[currentLevel];
+    }
 
     //for IDEs that need this stuff
     public static void main(String[] args) {
