@@ -42,16 +42,6 @@ public class QueensUI extends Application {
 
     // solutions[level][row][col] = 1 means queen belongs here (optional for later)
     static final int[][][] SOLUTIONS = {
-            { // Level 1 (level 7 in Medium folder)
-                    {0,0,0,0,0,1,0,0},
-                    {0,0,0,0,0,0,0,1},
-                    {0,0,0,0,1,0,0,0},
-                    {0,1,0,0,0,0,0,0},
-                    {0,0,0,1,0,0,0,0},
-                    {1,0,0,0,0,0,0,0},
-                    {0,0,1,0,0,0,0,0},
-                    {0,0,0,0,0,0,1,0}
-            },
             { // Level 2 (level 6 in Medium)
                     {0,1,0,0,0,0,0,0},
                     {0,0,0,0,0,0,1,0},
@@ -61,7 +51,17 @@ public class QueensUI extends Application {
                     {0,0,0,0,0,1,0,0},
                     {0,0,0,0,0,0,0,1},
                     {0,0,0,0,1,0,0,0}
-            } // Level 2 solution placeholder
+            }, // Level 2 solution placeholder
+            { // Level 1 (level 7 in Medium folder)
+                    {0,0,0,0,0,1,0,0},
+                    {0,0,0,0,0,0,0,1},
+                    {0,0,0,0,1,0,0,0},
+                    {0,1,0,0,0,0,0,0},
+                    {0,0,0,1,0,0,0,0},
+                    {1,0,0,0,0,0,0,0},
+                    {0,0,1,0,0,0,0,0},
+                    {0,0,0,0,0,0,1,0}
+            }
     };//end solution array
 
     //array to pre-define colors
@@ -92,11 +92,30 @@ public class QueensUI extends Application {
         Label title = new Label("Queens");
         title.setFont(Font.font(24));
 
+        //label that will show up under the button to return game state
+        Label puzzleCompleted = new Label("Not Checked");
+
+        //check puzzle button that will check if the puzzle is complete or not
+        Button checkState = new Button("Check Puzzle");
+        checkState.setOnAction(e ->
+        {
+            Logic logic = new Logic(this);
+            if (logic.checkGameState() == true)
+            {
+                puzzleCompleted.setText("The puzzle is correct!");
+            }
+            else
+            {
+                puzzleCompleted.setText("The puzzle is incorrect or incomplete!");
+            }
+        });
+
         //combo box that allows you to switch between levels.
         ComboBox<String> levelPicker = new ComboBox<>();
         for (int i = 0; i < LEVELS.length; i++) levelPicker.getItems().add("Level " + (i + 1));
         levelPicker.getSelectionModel().select(0);
         levelPicker.setOnAction(e -> {
+            puzzleCompleted.setText("Not Checked");
             currentLevel = levelPicker.getSelectionModel().getSelectedIndex();
             clearUserState();
             renderLevel(currentLevel);
@@ -105,20 +124,10 @@ public class QueensUI extends Application {
         //clear button that calls functions that will reset the game state
         Button clear = new Button("Clear Marks");
         clear.setOnAction(e -> {
+            puzzleCompleted.setText("Not Checked");
             clearUserState();
             renderSymbols();
         });
-
-        //check puzzle button that will check if the puzzle is complete or not
-        Button checkState = new Button("Check Puzzle");
-        checkState.setOnAction(e ->
-        {
-            Logic logic = new Logic(this);
-            logic.checkGameState();
-        });
-
-        //label that will show up under the button to return game state
-        Label gameState = new Label("Not Checked");
 
         //horizontal box that will act as a header for the program.
         HBox topBar = new HBox(12, title, levelPicker, clear);
@@ -130,7 +139,7 @@ public class QueensUI extends Application {
         renderLevel(currentLevel);
 
         //setting the header and gameplay area into a pane
-        VBox root = new VBox(10, topBar, board, checkState, gameState);
+        VBox root = new VBox(10, topBar, board, checkState, puzzleCompleted);
         root.setPadding(new Insets(10));
 
         //setting the scene for display
@@ -223,6 +232,13 @@ public class QueensUI extends Application {
     public int[][] getUserState()
     {
         return userState;
+    }
+
+    //getter for the current solution
+    public int[][] getSolution()
+    {
+        //return the proper array depending on the selected level
+        return SOLUTIONS[currentLevel];
     }
 
     //for IDEs that need this stuff
