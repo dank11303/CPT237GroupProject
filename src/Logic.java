@@ -1,9 +1,9 @@
 
 
-//class that will handle all of the logic checking for the application
+//class that will handle all the logic checking for the application
 public class Logic
 {
-    private QueensUI ui; //hold specific running UI
+    private final QueensUI ui; //hold specific running UI
 
     //constructor to pass the specific running UI to this class.
     public Logic(QueensUI ui)
@@ -37,14 +37,7 @@ public class Logic
         }
 
         //if entered answers are correct
-        if (correctEntries == requireCorrect)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return correctEntries == requireCorrect;
     }//end checkGameState()
 
     //check the states of the columns and rows

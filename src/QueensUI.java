@@ -15,9 +15,13 @@ import javafx.util.Duration;
 
 public class QueensUI extends Application {
 
+    //keeps track of the level time
     private final Timer levelTimer = new Timer();
+    //updates the timer label on a schedule
     private Timeline uiClock;
+    //shows the timer on the screen
     private final Label timerLabel = new Label("0:00");
+    //tracks if the timer has started yet
     private boolean timerStarted = false;
 
     //the number of columns and rows the grid has at the moment
@@ -87,7 +91,9 @@ public class QueensUI extends Application {
 
     //arrays that handle each grid and the marks it has
     private final int[][] userState = new int[N][N]; // 0 empty, 1 x, 2 queen
+    //stores the text shown in each grid cell
     private final Label[][] symbols = new Label[N][N];
+    //stores the clickable boxes for each grid cell
     private final StackPane[][] cells = new StackPane[N][N];
 
     private int currentLevel = 0;
@@ -103,25 +109,14 @@ public class QueensUI extends Application {
         Label puzzleCompleted = new Label("Not Checked");
 
         //check puzzle button that will check if the puzzle is complete or not
-        Button checkState = new Button("Check Puzzle");
-        checkState.setOnAction(e ->
-        {
-            Logic logic = new Logic(this);
-            if (logic.checkGameState() == true)
-            {
-                puzzleCompleted.setText("The puzzle is correct!");
-            }
-            else
-            {
-                puzzleCompleted.setText("The puzzle is incorrect or incomplete!");
-            }
-        });
+        Button checkState = getButton(puzzleCompleted);
 
         //combo box that allows you to switch between levels.
         ComboBox<String> levelPicker = new ComboBox<>();
         for (int i = 0; i < LEVELS.length; i++) levelPicker.getItems().add("Level " + (i + 1));
         levelPicker.getSelectionModel().select(0);
-        levelPicker.setOnAction(e -> {
+        //switch levels, reset the board, and restart the timer display
+        levelPicker.setOnAction(_ -> {
             puzzleCompleted.setText("Not Checked");
             currentLevel = levelPicker.getSelectionModel().getSelectedIndex();
             clearUserState();
@@ -134,7 +129,9 @@ public class QueensUI extends Application {
 
         //clear button that calls functions that will reset the game state
         Button clear = new Button("Clear Marks");
-        clear.setOnAction(e -> {
+
+        //clear the board, reset the status label, and restart the timer
+        clear.setOnAction(_ -> {
             puzzleCompleted.setText("Not Checked");
             clearUserState();
             renderSymbols();
@@ -146,9 +143,9 @@ public class QueensUI extends Application {
 
         timerLabel.setFont(Font.font(16));
 
-        uiClock = new Timeline(new KeyFrame(Duration.millis(200), e -> {
-            timerLabel.setText(levelTimer.getElapsedTimeString());
-        }));
+        //update the timer label over and over while the program runs
+        uiClock = new Timeline(new KeyFrame(Duration.millis(200), _ -> timerLabel.setText(levelTimer.getElapsedTimeString())));
+        //make the timer update repeat forever
         uiClock.setCycleCount(Timeline.INDEFINITE);
         uiClock.play();
 
@@ -168,10 +165,30 @@ public class QueensUI extends Application {
         //setting the scene for display
         stage.setScene(new Scene(root, 720, 820));
         stage.setTitle("Queens UI (Levels via 3D Array)");
-        stage.setOnCloseRequest(e -> {
+        //stop the timer updater when the window closes
+        stage.setOnCloseRequest(_ -> {
             if (uiClock != null) uiClock.stop();
         });
         stage.show();
+    }
+
+    //create and return the "Check Puzzle" button that updates the label with the result
+    private Button getButton(Label puzzleCompleted) {
+        Button checkState = new Button("Check Puzzle");
+        //when the button is clicked, check if the puzzle is solved and show the result
+        checkState.setOnAction(_ ->
+        {
+            Logic logic = new Logic(this);
+            if (logic.checkGameState() == true)
+            {
+                puzzleCompleted.setText("The puzzle is correct!");
+            }
+            else
+            {
+                puzzleCompleted.setText("The puzzle is incorrect or incomplete!");
+            }
+        });
+        return checkState;
     }
 
     //generates a GirdPane for the levels to be displayed in
@@ -197,17 +214,17 @@ public class QueensUI extends Application {
                 symbols[r][c] = txt;
                 cells[r][c] = cell;
 
-                //handles mouse clicks in each little cell
+                //start the timer on the first click, then cycle the cell state and redraw the board
                 int rr = r, cc = c;
-                cell.setOnMouseClicked(e -> {
-
+                cell.setOnMouseClicked(_ -> {
+                    //start the level timer the first time the player clicks the board
                     if (!timerStarted)
                     {
                         levelTimer.reset();
                         levelTimer.start();
                         timerStarted = true;
                     }
-
+                    //cycle this cell’s state (empty/x/queen) and update the display
                     userState[rr][cc] = (userState[rr][cc] + 1) % 3;
                     renderSymbols();
                 });

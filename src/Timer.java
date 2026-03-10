@@ -3,6 +3,7 @@
 //this class will handle the timing of each level when it starts and when it stops
 public class Timer
 {
+    //stores timer start time, total time so far, and if the timer is running
     private long startTime;
     private long elapsedTime;
     private boolean running;
@@ -40,6 +41,7 @@ public class Timer
         return elapsedTime;
     }
 
+    //convert the elapsed time into a simple minutes:seconds string
     public String getElapsedTimeString()
     {
         long ms = getElapsedMilliseconds();
@@ -49,6 +51,7 @@ public class Timer
         return String.format("%d:%02d", minutes, seconds);
     }
 
+    //reset the timer back to zero
     public void reset()
     {
         startTime = 0;
