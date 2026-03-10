@@ -1,4 +1,3 @@
-package src;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -10,8 +9,16 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.util.Duration;
 
 public class QueensUI extends Application {
+
+    private final Timer levelTimer = new Timer();
+    private Timeline uiClock;
+    private final Label timerLabel = new Label("0:00");
+    private boolean timerStarted = false;
 
     //the number of columns and rows the grid has at the moment
     static final int N = 8;
@@ -119,6 +126,10 @@ public class QueensUI extends Application {
             currentLevel = levelPicker.getSelectionModel().getSelectedIndex();
             clearUserState();
             renderLevel(currentLevel);
+
+            levelTimer.reset();
+            timerStarted = false;
+            timerLabel.setText("0:00");
         });
 
         //clear button that calls functions that will reset the game state
@@ -127,10 +138,22 @@ public class QueensUI extends Application {
             puzzleCompleted.setText("Not Checked");
             clearUserState();
             renderSymbols();
+
+            levelTimer.reset();
+            timerStarted = false;
+            timerLabel.setText("0:00");
         });
 
+        timerLabel.setFont(Font.font(16));
+
+        uiClock = new Timeline(new KeyFrame(Duration.millis(200), e -> {
+            timerLabel.setText(levelTimer.getElapsedTimeString());
+        }));
+        uiClock.setCycleCount(Timeline.INDEFINITE);
+        uiClock.play();
+
         //horizontal box that will act as a header for the program.
-        HBox topBar = new HBox(12, title, levelPicker, clear);
+        HBox topBar = new HBox(12, title, levelPicker, clear, new Label("Time:"), timerLabel);
         topBar.setAlignment(Pos.CENTER_LEFT);
         topBar.setPadding(new Insets(10));
 
@@ -145,6 +168,9 @@ public class QueensUI extends Application {
         //setting the scene for display
         stage.setScene(new Scene(root, 720, 820));
         stage.setTitle("Queens UI (Levels via 3D Array)");
+        stage.setOnCloseRequest(e -> {
+            if (uiClock != null) uiClock.stop();
+        });
         stage.show();
     }
 
@@ -174,6 +200,14 @@ public class QueensUI extends Application {
                 //handles mouse clicks in each little cell
                 int rr = r, cc = c;
                 cell.setOnMouseClicked(e -> {
+
+                    if (!timerStarted)
+                    {
+                        levelTimer.reset();
+                        levelTimer.start();
+                        timerStarted = true;
+                    }
+
                     userState[rr][cc] = (userState[rr][cc] + 1) % 3;
                     renderSymbols();
                 });
@@ -242,7 +276,7 @@ public class QueensUI extends Application {
     }
 
     //for IDEs that need this stuff
-    public static void main(String[] args) {
+    static void main(String[] args) {
         launch(args);
     }
 }
