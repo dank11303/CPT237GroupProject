@@ -51,6 +51,15 @@ public class Timer
         return String.format("%d:%02d", minutes, seconds);
     }
 
+    //overload the getElapsedTimeString function to allow for the time to be entered instead of grabbed from the object.
+    public String getElapsedTimeString(long ms)
+    {
+        long totalSeconds = ms / 1000;
+        long minutes = totalSeconds / 60;
+        long seconds = totalSeconds % 60;
+        return String.format("%d:%02d", minutes, seconds);
+    }//end getElapsedTimeString(long)
+
     //reset the timer back to zero
     public void reset()
     {

@@ -1,5 +1,3 @@
-
-
 //class that will handle all the logic checking for the application
 public class Logic
 {

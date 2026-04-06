@@ -12,6 +12,7 @@ import javafx.stage.Stage;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
+import java.util.HashMap;
 
 public class QueensUI extends Application {
 
@@ -96,6 +97,12 @@ public class QueensUI extends Application {
     //stores the clickable boxes for each grid cell
     private final StackPane[][] cells = new StackPane[N][N];
 
+    //declare the score saver object
+    ScoreSaver scoreSaver =  new ScoreSaver();
+    //check for best times file existence
+    HashMap<Integer, Long> bestTimes = scoreSaver.loadBestTimes(); //load any best times that may have been saved. Returns a HashMap<Integer, Long>
+
+
     private int currentLevel = 0;
 
     @Override
@@ -113,7 +120,16 @@ public class QueensUI extends Application {
 
         //combo box that allows you to switch between levels.
         ComboBox<String> levelPicker = new ComboBox<>();
-        for (int i = 0; i < LEVELS.length; i++) levelPicker.getItems().add("Level " + (i + 1));
+        for (int i = 0; i < LEVELS.length; i++)
+        {
+            String bt = "";
+            if (bestTimes.containsKey(i))
+            {
+                bt = levelTimer.getElapsedTimeString(bestTimes.get(i));
+            }
+            levelPicker.getItems().add("Level " + (i + 1) + " " + bt);
+            //if level has a best time, display that time (not done)
+        }
         levelPicker.getSelectionModel().select(0);
         //switch levels, reset the board, and restart the timer display
         levelPicker.setOnAction(_ -> {
@@ -125,6 +141,7 @@ public class QueensUI extends Application {
             levelTimer.reset();
             timerStarted = false;
             timerLabel.setText("0:00");
+            uiClock.play();
         });
 
         //clear button that calls functions that will reset the game state
@@ -139,6 +156,7 @@ public class QueensUI extends Application {
             levelTimer.reset();
             timerStarted = false;
             timerLabel.setText("0:00");
+            uiClock.play();
         });
 
         timerLabel.setFont(Font.font(16));
@@ -181,7 +199,23 @@ public class QueensUI extends Application {
             Logic logic = new Logic(this);
             if (logic.checkGameState() == true)
             {
-                puzzleCompleted.setText("The puzzle is correct!");
+                puzzleCompleted.setText("The puzzle is correct!\nYour completion time is : " + levelTimer.getElapsedTimeString());
+                levelTimer.pause();
+                uiClock.stop();
+                //check if the current level has a best time. If not, compare times and save soonest, if it is null, add time
+                if (bestTimes.containsKey(currentLevel))
+                {
+                    long savedTime = bestTimes.get(currentLevel);
+                    if (levelTimer.getElapsedMilliseconds() < savedTime)
+                    {
+                        bestTimes.put(currentLevel, levelTimer.getElapsedMilliseconds()); //save new time
+                    }
+                }
+                else
+                {
+                    bestTimes.put(currentLevel, levelTimer.getElapsedMilliseconds());
+                }
+                scoreSaver.saveBestTimes(bestTimes);
             }
             else
             {
