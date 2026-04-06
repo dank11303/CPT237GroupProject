@@ -96,6 +96,12 @@ public class QueensUI extends Application {
     //stores the clickable boxes for each grid cell
     private final StackPane[][] cells = new StackPane[N][N];
 
+    //declare the score saver object
+    ScoreSaver scoreSaver =  new ScoreSaver();
+    //check for best times file existence
+    HashMap<Integer, Long> bestTimes = scoreSaver.loadBestTimes(); //load any best times that may have been saved. Returns a HashMap<Integer, Long>
+
+
     private int currentLevel = 0;
 
     @Override
@@ -113,7 +119,11 @@ public class QueensUI extends Application {
 
         //combo box that allows you to switch between levels.
         ComboBox<String> levelPicker = new ComboBox<>();
-        for (int i = 0; i < LEVELS.length; i++) levelPicker.getItems().add("Level " + (i + 1));
+        for (int i = 0; i < LEVELS.length; i++)
+        {
+            levelPicker.getItems().add("Level " + (i + 1));
+            //if level has a best time, display that time (not done)
+        }
         levelPicker.getSelectionModel().select(0);
         //switch levels, reset the board, and restart the timer display
         levelPicker.setOnAction(_ -> {
@@ -181,7 +191,8 @@ public class QueensUI extends Application {
             Logic logic = new Logic(this);
             if (logic.checkGameState() == true)
             {
-                puzzleCompleted.setText("The puzzle is correct!");
+                puzzleCompleted.setText("The puzzle is correct!/nYour completion time is : " + levelTimer.getElapsedTimeString());
+                levelTimer.pause();
             }
             else
             {
