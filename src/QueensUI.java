@@ -12,6 +12,7 @@ import javafx.stage.Stage;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
+import java.util.HashMap;
 
 public class QueensUI extends Application {
 
