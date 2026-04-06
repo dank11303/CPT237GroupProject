@@ -121,7 +121,12 @@ public class QueensUI extends Application {
         ComboBox<String> levelPicker = new ComboBox<>();
         for (int i = 0; i < LEVELS.length; i++)
         {
-            levelPicker.getItems().add("Level " + (i + 1));
+            String bt = "";
+            if (bestTimes.containsKey(i))
+            {
+                bt = levelTimer.getElapsedTimeString(bestTimes.get(i));
+            }
+            levelPicker.getItems().add("Level " + (i + 1) + " " + bt);
             //if level has a best time, display that time (not done)
         }
         levelPicker.getSelectionModel().select(0);
@@ -135,6 +140,7 @@ public class QueensUI extends Application {
             levelTimer.reset();
             timerStarted = false;
             timerLabel.setText("0:00");
+            uiClock.play();
         });
 
         //clear button that calls functions that will reset the game state
@@ -149,6 +155,7 @@ public class QueensUI extends Application {
             levelTimer.reset();
             timerStarted = false;
             timerLabel.setText("0:00");
+            uiClock.play();
         });
 
         timerLabel.setFont(Font.font(16));
@@ -191,8 +198,23 @@ public class QueensUI extends Application {
             Logic logic = new Logic(this);
             if (logic.checkGameState() == true)
             {
-                puzzleCompleted.setText("The puzzle is correct!/nYour completion time is : " + levelTimer.getElapsedTimeString());
+                puzzleCompleted.setText("The puzzle is correct!\nYour completion time is : " + levelTimer.getElapsedTimeString());
                 levelTimer.pause();
+                uiClock.stop();
+                //check if the current level has a best time. If not, compare times and save soonest, if it is null, add time
+                if (bestTimes.containsKey(currentLevel))
+                {
+                    long savedTime = bestTimes.get(currentLevel);
+                    if (levelTimer.getElapsedMilliseconds() < savedTime)
+                    {
+                        bestTimes.put(currentLevel, levelTimer.getElapsedMilliseconds()); //save new time
+                    }
+                }
+                else
+                {
+                    bestTimes.put(currentLevel, levelTimer.getElapsedMilliseconds());
+                }
+                scoreSaver.saveBestTimes(bestTimes);
             }
             else
             {

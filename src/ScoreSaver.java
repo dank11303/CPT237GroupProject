@@ -1,8 +1,10 @@
 //imports
 import java.io.File;
 import java.io.FileWriter;
-import java.io.RandomAccessFile;
 import java.io.IOException;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.util.HashMap;
 
 //this class will manage the best times file for the game.
 public class ScoreSaver
