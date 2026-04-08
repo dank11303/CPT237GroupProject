@@ -28,6 +28,11 @@ public class QueensUI extends Application {
     //the number of columns and rows the grid has at the moment
     static final int N = 8;
 
+    public int[][] getCurrentLevelMap()
+    {
+        return LEVELS[currentLevel];
+    }
+
     // levels[level][row][col] = region/color id
     static final int[][][] LEVELS = {
             { // Level 1 (level 7 in Medium folder)
@@ -257,18 +262,16 @@ public class QueensUI extends Application {
     //stores the clickable boxes for each grid cell
     private final StackPane[][] cells = new StackPane[N][N];
 
-    //declare the score saver object
-    ScoreSaver scoreSaver =  new ScoreSaver();
     //check for best times file existence
-    HashMap<Integer, Long> bestTimes = scoreSaver.loadBestTimes(); //load any best times that may have been saved. Returns a HashMap<Integer, Long>
-
+    HashMap<Integer, Long> bestTimes = ScoreSaver.loadBestTimes(); //load any best times that may have been saved
 
     private int currentLevel = 0;
 
+    //used to switch ComboBox selection after loading a slot
+    private ComboBox<String> levelPicker;
+
     @Override
     public void start(Stage stage) {
-        //create logic object and pass "this" to it
-        Logic gameLogic = new Logic(this);
         Label title = new Label("Queens");
         title.setFont(Font.font(24));
 
@@ -279,7 +282,7 @@ public class QueensUI extends Application {
         Button checkState = getButton(puzzleCompleted);
 
         //combo box that allows you to switch between levels.
-        ComboBox<String> levelPicker = new ComboBox<>();
+        levelPicker = new ComboBox<>();
         for (int i = 0; i < LEVELS.length; i++)
         {
             String bt = "";
@@ -288,9 +291,9 @@ public class QueensUI extends Application {
                 bt = levelTimer.getElapsedTimeString(bestTimes.get(i));
             }
             levelPicker.getItems().add("Level " + (i + 1) + " " + bt);
-            //if level has a best time, display that time (not done)
         }
         levelPicker.getSelectionModel().select(0);
+
         //switch levels, reset the board, and restart the timer display
         levelPicker.setOnAction(_ -> {
             puzzleCompleted.setText("Not Checked");
@@ -327,6 +330,117 @@ public class QueensUI extends Application {
         uiClock.setCycleCount(Timeline.INDEFINITE);
         uiClock.play();
 
+        //save/load slot buttons
+        Button save1 = new Button("Save 1");
+        Button load1 = new Button("Load 1");
+        Button save2 = new Button("Save 2");
+        Button load2 = new Button("Load 2");
+        Button save3 = new Button("Save 3");
+        Button load3 = new Button("Load 3");
+
+//save the current level, board, and time into slot 1
+        save1.setOnAction(_ -> {
+            ScoreSaver.saveSlot(1, currentLevel, userState, levelTimer.getElapsedMilliseconds());
+            puzzleCompleted.setText("Saved to Slot 1");
+        });
+
+//load slot 1 and restore the level, board, and time
+        load1.setOnAction(_ -> {
+            ScoreSaver.SaveData data = ScoreSaver.loadSlot(1);
+            //if the slot file does not exist, show a message
+            if (data == null)
+            {
+                puzzleCompleted.setText("Slot 1 is empty");
+                return;
+            }
+
+            //show the load message
+            puzzleCompleted.setText("Loaded Slot 1");
+
+            //switch to the saved level and update the dropdown
+            setCurrentLevelIndex(data.levelIndex);
+            levelPicker.getSelectionModel().select(data.levelIndex);
+
+            //load the saved board
+            setUserState(data.userState);
+
+            //load the saved time and resume the timer display
+            levelTimer.setElapsedMilliseconds(data.elapsedMs);
+            timerStarted = true;
+            timerLabel.setText(levelTimer.getElapsedTimeString());
+            uiClock.play();
+        });
+
+//save the current level, board, and time into slot 2
+        save2.setOnAction(_ -> {
+            ScoreSaver.saveSlot(2, currentLevel, userState, levelTimer.getElapsedMilliseconds());
+            puzzleCompleted.setText("Saved to Slot 2");
+        });
+
+//load slot 2 and restore the level, board, and time
+        load2.setOnAction(_ -> {
+            ScoreSaver.SaveData data = ScoreSaver.loadSlot(2);
+            //if the slot file does not exist, show a message
+            if (data == null)
+            {
+                puzzleCompleted.setText("Slot 2 is empty");
+                return;
+            }
+
+            //show the load message
+            puzzleCompleted.setText("Loaded Slot 2");
+
+            //switch to the saved level and update the dropdown
+            setCurrentLevelIndex(data.levelIndex);
+            levelPicker.getSelectionModel().select(data.levelIndex);
+
+            //load the saved board
+            setUserState(data.userState);
+
+            //load the saved time and resume the timer display
+            levelTimer.setElapsedMilliseconds(data.elapsedMs);
+            timerStarted = true;
+            timerLabel.setText(levelTimer.getElapsedTimeString());
+            uiClock.play();
+        });
+
+//save the current level, board, and time into slot 3
+        save3.setOnAction(_ -> {
+            ScoreSaver.saveSlot(3, currentLevel, userState, levelTimer.getElapsedMilliseconds());
+            puzzleCompleted.setText("Saved to Slot 3");
+        });
+
+//load slot 3 and restore the level, board, and time
+        load3.setOnAction(_ -> {
+            ScoreSaver.SaveData data = ScoreSaver.loadSlot(3);
+            //if the slot file does not exist, show a message
+            if (data == null)
+            {
+                puzzleCompleted.setText("Slot 3 is empty");
+                return;
+            }
+
+            //show the load message
+            puzzleCompleted.setText("Loaded Slot 3");
+
+            //switch to the saved level and update the dropdown
+            setCurrentLevelIndex(data.levelIndex);
+            levelPicker.getSelectionModel().select(data.levelIndex);
+
+            //load the saved board
+            setUserState(data.userState);
+
+            //load the saved time and resume the timer display
+            levelTimer.setElapsedMilliseconds(data.elapsedMs);
+            timerStarted = true;
+            timerLabel.setText(levelTimer.getElapsedTimeString());
+            uiClock.play();
+        });
+
+        HBox slotsBar = new HBox(10, save1, load1, save2, load2, save3, load3);
+        slotsBar.setAlignment(Pos.CENTER_LEFT);
+        slotsBar.setPadding(new Insets(5, 10, 5, 10));
+
         //horizontal box that will act as a header for the program.
         HBox topBar = new HBox(12, title, levelPicker, clear, new Label("Time:"), timerLabel);
         topBar.setAlignment(Pos.CENTER_LEFT);
@@ -337,51 +451,70 @@ public class QueensUI extends Application {
         renderLevel(currentLevel);
 
         //setting the header and gameplay area into a pane
-        VBox root = new VBox(10, topBar, board, checkState, puzzleCompleted);
+        VBox root = new VBox(10, topBar, board, slotsBar, checkState, puzzleCompleted);
         root.setPadding(new Insets(10));
 
         //setting the scene for display
         stage.setScene(new Scene(root, 720, 820));
         stage.setTitle("Queens UI (Levels via 3D Array)");
+
         //stop the timer updater when the window closes
         stage.setOnCloseRequest(_ -> {
             if (uiClock != null) uiClock.stop();
         });
+
         stage.show();
     }
 
     //create and return the "Check Puzzle" button that updates the label with the result
-    private Button getButton(Label puzzleCompleted) {
+    private Button getButton(Label puzzleCompleted)
+    {
+        //create the check puzzle button
         Button checkState = new Button("Check Puzzle");
+
         //when the button is clicked, check if the puzzle is solved and show the result
         checkState.setOnAction(_ ->
         {
+            //create a logic object to check the game state
             Logic logic = new Logic(this);
+
+            //if the puzzle is solved
             if (logic.checkGameState() == true)
             {
+                //show the win message and time
                 puzzleCompleted.setText("The puzzle is correct!\nYour completion time is : " + levelTimer.getElapsedTimeString());
+
+                //stop the timer and UI updates
                 levelTimer.pause();
                 uiClock.stop();
-                //check if the current level has a best time. If not, compare times and save soonest, if it is null, add time
+
+                //if a best time exists, only save if the new time is faster
                 if (bestTimes.containsKey(currentLevel))
                 {
                     long savedTime = bestTimes.get(currentLevel);
                     if (levelTimer.getElapsedMilliseconds() < savedTime)
                     {
-                        bestTimes.put(currentLevel, levelTimer.getElapsedMilliseconds()); //save new time
+                        bestTimes.put(currentLevel, levelTimer.getElapsedMilliseconds());
                     }
                 }
+                //if no best time exists, save the current time
                 else
                 {
                     bestTimes.put(currentLevel, levelTimer.getElapsedMilliseconds());
                 }
-                scoreSaver.saveBestTimes(bestTimes);
+
+                //save best times to the file
+                ScoreSaver.saveBestTimes(bestTimes);
             }
+            //if the puzzle is not solved
             else
             {
+                //show the fail message
                 puzzleCompleted.setText("The puzzle is incorrect or incomplete!");
             }
         });
+
+        //return the button
         return checkState;
     }
 
@@ -457,7 +590,7 @@ public class QueensUI extends Application {
                 //checks the symbols array for each cell and places the appropriate symbol depending on the state of the cell
                 symbols[r][c].setText(
                         userState[r][c] == 0 ? "" :
-                        userState[r][c] == 1 ? "x" : "♛"
+                                userState[r][c] == 1 ? "x" : "♛"
                 );
             }
         }
@@ -486,8 +619,41 @@ public class QueensUI extends Application {
         return SOLUTIONS[currentLevel];
     }
 
+    //getter for the current level number
+    public int getCurrentLevelIndex()
+    {
+        //return the current selected level
+        return currentLevel;
+    }
+
+    //setter for the current level number
+    public void setCurrentLevelIndex(int levelIndex)
+    {
+        //set the level and reset the board
+        currentLevel = levelIndex;
+        clearUserState();
+        renderLevel(currentLevel);
+
+        //reset the timer for the new level
+        levelTimer.reset();
+        timerStarted = false;
+        timerLabel.setText("0:00");
+    }
+
+    //setter to load a saved board into the grid
+    public void setUserState(int[][] loaded)
+    {
+        //copy the loaded board into the current board
+        for (int r = 0; r < N; r++)
+            for (int c = 0; c < N; c++)
+                userState[r][c] = loaded[r][c];
+
+        //redraw the symbols on the screen
+        renderSymbols();
+    }
+
     //for IDEs that need this stuff
-    static void main(String[] args) {
+    public static void main(String[] args) {
         launch(args);
     }
 }

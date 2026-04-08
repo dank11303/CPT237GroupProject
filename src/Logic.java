@@ -9,50 +9,117 @@ public class Logic
         this.ui = ui;
     }//end Logic(QueensUI)
 
-    //temporary for prototyping
+    //dynamic win check (rules-based)
     public Boolean checkGameState()
     {
-        //get the current user answers for the puzzle by using getter in QueensUI.java
         int[][] submittedState = ui.getUserState();
 
-        //get answer for current puzzle
-        int[][] puzzleAnswer = ui.getSolution();
-
-        //answered numbers
-        int requireCorrect = puzzleAnswer.length;
-        int correctEntries = 0;
-
-        //loop through submitted answers and the key
+        //must place exactly N queens total (one per row/col/region)
+        int queens = 0;
         for (int r = 0; r < submittedState.length; r++)
         {
             for (int c = 0; c < submittedState[0].length; c++)
             {
-                if (submittedState[r][c] == 2 && puzzleAnswer[r][c] == 1)
-                {
-                    correctEntries ++;
-                }
+                if (submittedState[r][c] == 2) queens++;
             }
         }
 
-        //if entered answers are correct
-        return correctEntries == requireCorrect;
+        if (queens != submittedState.length) return false;
+
+        return checkColsAndRows() && checkAreas() && checkTouching();
     }//end checkGameState()
 
     //check the states of the columns and rows
     public Boolean checkColsAndRows()
     {
-        return false;
+        int[][] submittedState = ui.getUserState();
+        int n = submittedState.length;
+
+        //check each row has exactly 1 queen
+        for (int r = 0; r < n; r++)
+        {
+            int count = 0;
+            for (int c = 0; c < n; c++)
+            {
+                if (submittedState[r][c] == 2) count++;
+            }
+            if (count != 1) return false;
+        }
+
+        //check each column has exactly 1 queen
+        for (int c = 0; c < n; c++)
+        {
+            int count = 0;
+            for (int r = 0; r < n; r++)
+            {
+                if (submittedState[r][c] == 2) count++;
+            }
+            if (count != 1) return false;
+        }
+
+        return true;
     }//end checkColsAndRows()
 
     //check that each area only has one queen
     public Boolean checkAreas()
     {
-        return false;
+        int[][] submittedState = ui.getUserState();
+        int[][] regionMap = ui.getCurrentLevelMap();
+        int n = submittedState.length;
+
+        int[] regionCount = new int[n];
+
+        for (int r = 0; r < n; r++)
+        {
+            for (int c = 0; c < n; c++)
+            {
+                if (submittedState[r][c] == 2)
+                {
+                    int regionId = regionMap[r][c];
+                    regionCount[regionId]++;
+                }
+            }
+        }
+
+        for (int i = 0; i < n; i++)
+        {
+            if (regionCount[i] != 1) return false;
+        }
+
+        return true;
     }//end checkAreas()
 
     //check if the queens in the game have any touching them.
     public Boolean checkTouching()
     {
-        return false;
+        int[][] submittedState = ui.getUserState();
+        int n = submittedState.length;
+
+        for (int r = 0; r < n; r++)
+        {
+            for (int c = 0; c < n; c++)
+            {
+                if (submittedState[r][c] == 2)
+                {
+                    for (int dr = -1; dr <= 1; dr++)
+                    {
+                        for (int dc = -1; dc <= 1; dc++)
+                        {
+                            if (dr == 0 && dc == 0) continue;
+
+                            int rr = r + dr;
+                            int cc = c + dc;
+
+                            if (rr >= 0 && rr < n && cc >= 0 && cc < n)
+                            {
+                                if (submittedState[rr][cc] == 2) return false;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return true;
     }//end checkTouching()
 }

@@ -1,5 +1,3 @@
-
-
 //this class will handle the timing of each level when it starts and when it stops
 public class Timer
 {
@@ -17,6 +15,7 @@ public class Timer
             running = true;
         }
     }
+
     //stop the timer
     public void stop()
     {
@@ -26,11 +25,13 @@ public class Timer
             running = false;
         }
     }
+
     //pause the timer
     public void pause()
     {
         stop();
     }
+
     //output the difference in time once the level is completed and a time is called for.
     public long getElapsedMilliseconds()
     {
@@ -59,6 +60,13 @@ public class Timer
         long seconds = totalSeconds % 60;
         return String.format("%d:%02d", minutes, seconds);
     }//end getElapsedTimeString(long)
+
+    //set the timer to a specific elapsed time (used for loading save slots)
+    public void setElapsedMilliseconds(long ms)
+    {
+        reset();
+        elapsedTime = ms;
+    }
 
     //reset the timer back to zero
     public void reset()
