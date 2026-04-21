@@ -2,6 +2,7 @@ import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.Parent;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Button;
@@ -27,6 +28,26 @@ public class QueensUI extends Application {
 
     //the number of columns and rows the grid has at the moment
     static final int N = 8;
+
+    //store the main stage so we can switch screens
+    private Stage primaryStage;
+
+    //store the selector scene so we can return to it
+    private Scene selectorScene;
+
+    //label used to show messages on the selector screen
+    private Label selectorStatus;
+
+    //used to switch ComboBox selection after loading a slot
+    private ComboBox<String> levelPicker;
+
+    //check for best times file existence
+    HashMap<Integer, Long> bestTimes = ScoreSaver.loadBestTimes(); //load any best times that may have been saved
+
+    //holds a slot load request when user loads from selector screen
+    private ScoreSaver.SaveData pendingLoadedSlot = null;
+
+    private int currentLevel = 0;
 
     public int[][] getCurrentLevelMap()
     {
@@ -149,7 +170,7 @@ public class QueensUI extends Application {
                     {0,0,0,0,0,0,0,1},
                     {0,0,0,0,1,0,0,0}
             },
-            { // Level 2 (level 6 in Medium folder)
+            { // Level 2
                     {0,0,0,0,0,1,0,0},
                     {0,0,0,0,0,0,0,1},
                     {0,0,0,0,1,0,0,0},
@@ -159,7 +180,7 @@ public class QueensUI extends Application {
                     {0,0,1,0,0,0,0,0},
                     {0,0,0,0,0,0,1,0}
             },
-            { // Level 3 (level 8 in Medium)
+            { // Level 3
                     {0,0,0,0,1,0,0,0},
                     {0,0,1,0,0,0,0,0},
                     {0,0,0,0,0,1,0,0},
@@ -169,7 +190,7 @@ public class QueensUI extends Application {
                     {1,0,0,0,0,0,0,0},
                     {0,0,0,0,0,0,0,1}
             },
-            { // Level 4 (level 9 in Medium)
+            { // Level 4
                     {0,0,0,0,0,0,1,0},
                     {0,0,0,0,1,0,0,0},
                     {0,0,1,0,0,0,0,0},
@@ -179,7 +200,7 @@ public class QueensUI extends Application {
                     {0,0,0,0,0,0,0,1},
                     {1,0,0,0,0,0,0,0}
             },
-            { // Level 5 (level 10 in Medium)
+            { // Level 5
                     {1,0,0,0,0,0,0,0},
                     {0,0,1,0,0,0,0,0},
                     {0,0,0,0,0,0,1,0},
@@ -189,7 +210,7 @@ public class QueensUI extends Application {
                     {0,0,0,0,1,0,0,0},
                     {0,1,0,0,0,0,0,0}
             },
-            { // Level 6 (level 6 in Difficult)
+            { // Level 6
                     {0,0,0,0,0,1,0,0},
                     {0,0,1,0,0,0,0,0},
                     {0,0,0,0,0,0,1,0},
@@ -199,7 +220,7 @@ public class QueensUI extends Application {
                     {0,0,0,0,1,0,0,0},
                     {0,0,0,0,0,0,0,1}
             },
-            { // Level 7 (level 7 in Difficult)
+            { // Level 7
                     {0,0,0,0,0,1,0,0},
                     {0,0,0,1,0,0,0,0},
                     {0,0,0,0,0,0,0,1},
@@ -209,7 +230,7 @@ public class QueensUI extends Application {
                     {1,0,0,0,0,0,0,0},
                     {0,0,1,0,0,0,0,0}
             },
-            { // Level 8 (level 8 in Difficult)
+            { // Level 8
                     {0,0,0,0,0,0,0,1},
                     {0,0,0,0,0,1,0,0},
                     {0,1,0,0,0,0,0,0},
@@ -219,7 +240,7 @@ public class QueensUI extends Application {
                     {0,0,0,1,0,0,0,0},
                     {1,0,0,0,0,0,0,0}
             },
-            { // Level 9 (level 9 in Difficult)
+            { // Level 9
                     {0,0,1,0,0,0,0,0},
                     {1,0,0,0,0,0,0,0},
                     {0,0,0,0,0,0,0,1},
@@ -229,7 +250,7 @@ public class QueensUI extends Application {
                     {0,0,0,1,0,0,0,0},
                     {0,0,0,0,0,1,0,0}
             },
-            { // Level 10 (level 10 in Difficult)
+            { // Level 10
                     {1,0,0,0,0,0,0,0},
                     {0,0,0,1,0,0,0,0},
                     {0,0,0,0,0,0,1,0},
@@ -262,16 +283,184 @@ public class QueensUI extends Application {
     //stores the clickable boxes for each grid cell
     private final StackPane[][] cells = new StackPane[N][N];
 
-    //check for best times file existence
-    HashMap<Integer, Long> bestTimes = ScoreSaver.loadBestTimes(); //load any best times that may have been saved
-
-    private int currentLevel = 0;
-
-    //used to switch ComboBox selection after loading a slot
-    private ComboBox<String> levelPicker;
-
     @Override
     public void start(Stage stage) {
+
+        //store the stage so we can swap between screens
+        primaryStage = stage;
+
+        //build the level selector screen first
+        selectorScene = new Scene(buildLevelSelectorUI(), 520, 340);
+
+        //show the selector screen
+        primaryStage.setTitle("Queens - Level Select");
+        primaryStage.setScene(selectorScene);
+        primaryStage.show();
+    }
+
+    //build the level selector screen (ui)
+    private Parent buildLevelSelectorUI()
+    {
+        //title label for selector screen
+        Label title = new Label("Queens");
+        title.setFont(Font.font(28));
+
+        //small instructions label
+        Label info = new Label("Choose a level and press Start Game.");
+        info.setFont(Font.font(14));
+
+        //dropdown list to pick a level
+        ComboBox<String> selectorPicker = new ComboBox<>();
+
+        //fill the dropdown with levels + best time (if any)
+        for (int i = 0; i < LEVELS.length; i++)
+        {
+            String bt = "";
+            if (bestTimes.containsKey(i))
+            {
+                bt = " (Best: " + levelTimer.getElapsedTimeString(bestTimes.get(i)) + ")";
+            }
+            selectorPicker.getItems().add("Level " + (i + 1) + bt);
+        }
+
+        //default selection
+        selectorPicker.getSelectionModel().select(0);
+
+        //button that starts the game
+        Button startGame = new Button("Start Game");
+
+        //slot buttons on the selector screen (stacked)
+        Button loadSlot1 = new Button("Load Slot 1");
+        Button loadSlot2 = new Button("Load Slot 2");
+        Button loadSlot3 = new Button("Load Slot 3");
+
+        //label to show selector messages (slot empty, etc.)
+        selectorStatus = new Label("");
+        selectorStatus.setFont(Font.font(13));
+
+        //when clicked, set the level and switch to the game screen
+        startGame.setOnAction(_ -> {
+            pendingLoadedSlot = null; //starting normally, no slot load
+            currentLevel = selectorPicker.getSelectionModel().getSelectedIndex();
+            showGameScreen();
+        });
+
+        //load a slot and start the game
+        loadSlot1.setOnAction(_ -> loadSlotFromSelector(1));
+        loadSlot2.setOnAction(_ -> loadSlotFromSelector(2));
+        loadSlot3.setOnAction(_ -> loadSlotFromSelector(3));
+
+        //LEFT column: level selector
+        VBox leftCol = new VBox(8, selectorPicker);
+        leftCol.setAlignment(Pos.CENTER_LEFT);
+
+        //MIDDLE column: start game button
+        VBox middleCol = new VBox(startGame);
+        middleCol.setAlignment(Pos.CENTER);
+
+        //RIGHT column: load slot buttons stacked
+        VBox rightCol = new VBox(10, loadSlot1, loadSlot2, loadSlot3);
+        rightCol.setAlignment(Pos.CENTER_RIGHT);
+
+        //row that holds left/middle/right
+        HBox row = new HBox(40, leftCol, middleCol, rightCol);
+        row.setAlignment(Pos.CENTER);
+        row.setPadding(new Insets(10));
+
+        //whole selector screen layout
+        VBox selectorRoot = new VBox(15, title, info, row, selectorStatus);
+        selectorRoot.setPadding(new Insets(20));
+        selectorRoot.setAlignment(Pos.CENTER);
+
+        return selectorRoot;
+    }
+
+    //load a save slot directly from the selector screen
+    private void loadSlotFromSelector(int slotNumber)
+    {
+        //try to load the slot file
+        ScoreSaver.SaveData data = ScoreSaver.loadSlot(slotNumber);
+
+        //if the slot file does not exist, show a message
+        if (data == null)
+        {
+            selectorStatus.setText("Slot " + slotNumber + " is empty");
+            return;
+        }
+
+        //save the loaded data so we can apply it after the game UI is created
+        pendingLoadedSlot = data;
+        currentLevel = data.levelIndex;
+
+        //show the game screen
+        showGameScreen();
+    }
+
+    //switch to the game screen
+    private void showGameScreen()
+    {
+        //stop any old clock (only matters if you go back and forth)
+        if (uiClock != null) uiClock.stop();
+
+        //build the game UI and swap scenes
+        Parent gameRoot = buildGameUI();
+        Scene gameScene = new Scene(gameRoot, 720, 820);
+
+        primaryStage.setTitle("Queens UI (Levels via 3D Array)");
+        primaryStage.setScene(gameScene);
+        primaryStage.show();
+
+        //if a slot was loaded from the selector screen, apply it now
+        if (pendingLoadedSlot != null)
+        {
+            applyLoadedSlot(pendingLoadedSlot);
+            pendingLoadedSlot = null;
+        }
+    }
+
+    //apply loaded slot data after the game UI exists
+    private void applyLoadedSlot(ScoreSaver.SaveData data)
+    {
+        //switch to saved level and update dropdown
+        setCurrentLevelIndex(data.levelIndex);
+        levelPicker.getSelectionModel().select(data.levelIndex);
+
+        //load the saved board
+        setUserState(data.userState);
+
+        //load the saved time and resume the timer display
+        levelTimer.setElapsedMilliseconds(data.elapsedMs);
+        timerStarted = true;
+        timerLabel.setText(levelTimer.getElapsedTimeString());
+        uiClock.play();
+    }
+
+    //switch back to the level selector screen
+    private void showSelectorScreen()
+    {
+        //stop the UI timer updates
+        if (uiClock != null) uiClock.stop();
+
+        //reload best times so selector shows newest values
+        bestTimes = ScoreSaver.loadBestTimes();
+
+        //rebuild selector screen so best times update
+        selectorScene = new Scene(buildLevelSelectorUI(), 520, 340);
+
+        //reset the timer display
+        levelTimer.reset();
+        timerStarted = false;
+        timerLabel.setText("0:00");
+
+        //go back to selector
+        primaryStage.setTitle("Queens - Level Select");
+        primaryStage.setScene(selectorScene);
+        primaryStage.show();
+    }
+
+    //build the game screen (this is your old start() code moved into a method)
+    private Parent buildGameUI()
+    {
         Label title = new Label("Queens");
         title.setFont(Font.font(24));
 
@@ -280,6 +469,10 @@ public class QueensUI extends Application {
 
         //check puzzle button that will check if the puzzle is complete or not
         Button checkState = getButton(puzzleCompleted);
+
+        //button to go back to the selector screen
+        Button backToLevels = new Button("Back to Levels");
+        backToLevels.setOnAction(_ -> showSelectorScreen());
 
         //combo box that allows you to switch between levels.
         levelPicker = new ComboBox<>();
@@ -292,7 +485,9 @@ public class QueensUI extends Application {
             }
             levelPicker.getItems().add("Level " + (i + 1) + " " + bt);
         }
-        levelPicker.getSelectionModel().select(0);
+
+        //start on the chosen level
+        levelPicker.getSelectionModel().select(currentLevel);
 
         //switch levels, reset the board, and restart the timer display
         levelPicker.setOnAction(_ -> {
@@ -338,13 +533,13 @@ public class QueensUI extends Application {
         Button save3 = new Button("Save 3");
         Button load3 = new Button("Load 3");
 
-//save the current level, board, and time into slot 1
+        //save the current level, board, and time into slot 1
         save1.setOnAction(_ -> {
             ScoreSaver.saveSlot(1, currentLevel, userState, levelTimer.getElapsedMilliseconds());
             puzzleCompleted.setText("Saved to Slot 1");
         });
 
-//load slot 1 and restore the level, board, and time
+        //load slot 1 and restore the level, board, and time
         load1.setOnAction(_ -> {
             ScoreSaver.SaveData data = ScoreSaver.loadSlot(1);
             //if the slot file does not exist, show a message
@@ -371,13 +566,13 @@ public class QueensUI extends Application {
             uiClock.play();
         });
 
-//save the current level, board, and time into slot 2
+        //save the current level, board, and time into slot 2
         save2.setOnAction(_ -> {
             ScoreSaver.saveSlot(2, currentLevel, userState, levelTimer.getElapsedMilliseconds());
             puzzleCompleted.setText("Saved to Slot 2");
         });
 
-//load slot 2 and restore the level, board, and time
+        //load slot 2 and restore the level, board, and time
         load2.setOnAction(_ -> {
             ScoreSaver.SaveData data = ScoreSaver.loadSlot(2);
             //if the slot file does not exist, show a message
@@ -404,13 +599,13 @@ public class QueensUI extends Application {
             uiClock.play();
         });
 
-//save the current level, board, and time into slot 3
+        //save the current level, board, and time into slot 3
         save3.setOnAction(_ -> {
             ScoreSaver.saveSlot(3, currentLevel, userState, levelTimer.getElapsedMilliseconds());
             puzzleCompleted.setText("Saved to Slot 3");
         });
 
-//load slot 3 and restore the level, board, and time
+        //load slot 3 and restore the level, board, and time
         load3.setOnAction(_ -> {
             ScoreSaver.SaveData data = ScoreSaver.loadSlot(3);
             //if the slot file does not exist, show a message
@@ -442,7 +637,7 @@ public class QueensUI extends Application {
         slotsBar.setPadding(new Insets(5, 10, 5, 10));
 
         //horizontal box that will act as a header for the program.
-        HBox topBar = new HBox(12, title, levelPicker, clear, new Label("Time:"), timerLabel);
+        HBox topBar = new HBox(12, backToLevels, title, levelPicker, clear, new Label("Time:"), timerLabel);
         topBar.setAlignment(Pos.CENTER_LEFT);
         topBar.setPadding(new Insets(10));
 
@@ -454,16 +649,12 @@ public class QueensUI extends Application {
         VBox root = new VBox(10, topBar, board, slotsBar, checkState, puzzleCompleted);
         root.setPadding(new Insets(10));
 
-        //setting the scene for display
-        stage.setScene(new Scene(root, 720, 820));
-        stage.setTitle("Queens UI (Levels via 3D Array)");
-
         //stop the timer updater when the window closes
-        stage.setOnCloseRequest(_ -> {
+        primaryStage.setOnCloseRequest(_ -> {
             if (uiClock != null) uiClock.stop();
         });
 
-        stage.show();
+        return root;
     }
 
     //create and return the "Check Puzzle" button that updates the label with the result
