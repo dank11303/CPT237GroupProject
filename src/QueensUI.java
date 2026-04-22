@@ -45,7 +45,7 @@ public class QueensUI extends Application
     public int[][] getUserState()
     {
         //if boardUI has not been created yet, return an empty board
-        return boardUI == null ? new int[Levels.N][Levels.N] : boardUI.getUserState();
+        return boardUI == null ? new int[0][0] : boardUI.getUserState();
     }
 
     //getter used by Logic.java to read the current level's region map (for region checking)

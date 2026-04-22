@@ -109,10 +109,10 @@ public class ScoreSaver
         //write/overwrite the slot file
         try (FileWriter writer = new FileWriter(slotFile))
         {
-            //line 1: levelIndex,elapsedMs
-            writer.write(levelIndex + "," + elapsedMs + "\n");
+            //line 1: levelIndex,elapsedMs,n
+            writer.write(levelIndex + "," + elapsedMs + "," + userState.length + "\n");
 
-            //next lines: write the 8x8 board as comma-separated numbers
+            //next lines: write the n by n board as comma-separated numbers
             for (int[] row : userState)
             {
                 for (int c = 0; c < userState[0].length; c++)
@@ -154,18 +154,19 @@ public class ScoreSaver
             //if file is empty, return null
             if (header == null) return null;
 
-            //split the header into two parts
+            //split the header into three parts
             String[] headParts = header.split(",");
 
             //convert header parts into numbers
             int levelIndex = Integer.parseInt(headParts[0]);
             long elapsedMs = Long.parseLong(headParts[1]);
+            int n = Integer.parseInt(headParts[2]);
 
-            //read board (8x8)
-            int[][] board = new int[8][8];
+            //read board (n by n)
+            int[][] board = new int[n][n];
 
-            //read 8 lines, one line per row
-            for (int r = 0; r < 8; r++)
+            //read n lines, one line per row
+            for (int r = 0; r < n; r++)
             {
                 String line = reader.readLine();
 
@@ -176,7 +177,7 @@ public class ScoreSaver
                 String[] parts = line.split(",");
 
                 //convert each number and store in the board
-                for (int c = 0; c < 8; c++)
+                for (int c = 0; c < n; c++)
                 {
                     board[r][c] = Integer.parseInt(parts[c]);
                 }

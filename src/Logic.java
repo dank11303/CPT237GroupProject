@@ -93,9 +93,22 @@ public class Logic
         //board size (8 for a 8x8 board)
         int n = submittedState.length;
 
-        //this counts how many queens are in each region
-        //IMPORTANT: this assumes your region ids go from 0 to 7 (for a 8x8 board)
-        int[] regionCount = new int[n];
+        //create a hash set to store each ID that is in a level. This is used because it will be easy to only pay
+        //  attention to IDs that exist because some levels skip IDs for aesthetic reasons
+        java.util.HashSet<Integer> ids = new java.util.HashSet<>();
+
+        //for the maximum counter
+        int max = 0;
+        //checks how many regions exist
+        for (int[] row : regionMap) //for each row in the regionMap
+        {
+            for (int id : row) //for each ID in the row
+            {
+                ids.add(id); //add to the set and duplicates are ignored automatically
+                if (id > max) max = id; //set the maxID
+            }
+        }
+        int[] regionCount = new int[max + 1]; //set an accurate region count
 
         //loop through every cell
         for (int r = 0; r < n; r++)
@@ -115,9 +128,9 @@ public class Logic
         }
 
         //each region must have exactly 1 queen
-        for (int i = 0; i < n; i++)
+        for (int id : ids)
         {
-            if (regionCount[i] != 1) return false;
+            if (regionCount[id] != 1) return false;
         }
 
         //passed region check

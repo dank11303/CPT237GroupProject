@@ -10,15 +10,15 @@ public class BoardUI
 {
     //stores what the player placed:
     //0 = empty, 1 = x mark, 2 = queen
-    private final int[][] userState = new int[Levels.N][Levels.N];
+    private int[][] userState;
 
     //each cell has a Label that shows either "", "x", or "♛"
-    private final Label[][] symbols = new Label[Levels.N][Levels.N];
+    private Label[][] symbols;
 
     //each cell is a clickable StackPane (background + label)
-    private final StackPane[][] cells = new StackPane[Levels.N][Levels.N];
+    private StackPane[][] cells;
 
-    //the main grid that holds all 64 cells (8x8)
+    //the main grid that holds all cells
     private final GridPane grid = new GridPane();
 
     //this is a callback QueensUI can set (used to start timer on first click)
@@ -27,7 +27,10 @@ public class BoardUI
     //tracks if we already fired the first-action callback
     private boolean firstActionFired = false;
 
-    //constructor builds the entire board (grid + cells + click events)
+    //will be set to the selected level size once that is known
+    private int n = 0;
+
+    //constructor sets gaps and alignment for the board
     public BoardUI()
     {
         //small spacing between cells
@@ -36,11 +39,49 @@ public class BoardUI
 
         //center the board on the screen
         grid.setAlignment(Pos.CENTER);
+    }
 
-        //build the 8x8 board
-        for (int r = 0; r < Levels.N; r++)
+    //returns the board so QueensUI can add it to the game screen
+    public Parent getNode()
+    {
+        return grid;
+    }
+
+    //returns the player's board state (Logic.java uses this)
+    public int[][] getUserState()
+    {
+        return userState;
+    }
+
+    //QueensUI sets a callback that runs once when the player first clicks the board
+    public void setOnFirstAction(Runnable action)
+    {
+        onFirstAction = action;
+    }
+
+    //resets the "first click" so the timer can start again (new level / clear)
+    public void resetFirstAction()
+    {
+        firstActionFired = false;
+    }
+
+    //builds the board and sets the colors of each cell based on the region map for the current level
+    public void renderLevel(int[][] regionMap)
+    {
+        //get the size of the map for the specific level sizing
+        n = regionMap.length;
+
+        //create arrays depending on their size for dynamics!
+        userState = new int[n][n];
+        symbols = new Label[n][n];
+        cells = new StackPane[n][n];
+
+        grid.getChildren().clear(); //clear the grid before doing anything crazy
+
+        //build the n by n board
+        for (int r = 0; r < n; r++)
         {
-            for (int c = 0; c < Levels.N; c++)
+            for (int c = 0; c < n; c++)
             {
                 //this is the clickable square
                 StackPane cell = new StackPane();
@@ -90,39 +131,11 @@ public class BoardUI
                 grid.add(cell, c, r);
             }
         }
-    }
 
-    //returns the board so QueensUI can add it to the game screen
-    public Parent getNode()
-    {
-        return grid;
-    }
-
-    //returns the player's board state (Logic uses this)
-    public int[][] getUserState()
-    {
-        return userState;
-    }
-
-    //QueensUI sets a callback that runs once when the player first clicks the board
-    public void setOnFirstAction(Runnable action)
-    {
-        onFirstAction = action;
-    }
-
-    //resets the "first click" so the timer can start again (new level / clear)
-    public void resetFirstAction()
-    {
-        firstActionFired = false;
-    }
-
-    //sets the colors of each cell based on the region map for the current level
-    public void renderLevel(int[][] regionMap)
-    {
         //loop through the board and paint each cell
-        for (int r = 0; r < Levels.N; r++)
+        for (int r = 0; r < n; r++)
         {
-            for (int c = 0; c < Levels.N; c++)
+            for (int c = 0; c < n; c++)
             {
                 //region id comes from LEVELS array
                 int id = regionMap[r][c];
@@ -144,9 +157,9 @@ public class BoardUI
     //updates the x/queen text based on userState
     public void renderSymbols()
     {
-        for (int r = 0; r < Levels.N; r++)
+        for (int r = 0; r < n; r++)
         {
-            for (int c = 0; c < Levels.N; c++)
+            for (int c = 0; c < n; c++)
             {
                 //convert userState number into a symbol
                 symbols[r][c].setText(
@@ -161,8 +174,8 @@ public class BoardUI
     public void clear()
     {
         //set every cell back to 0 (empty)
-        for (int r = 0; r < Levels.N; r++)
-            for (int c = 0; c < Levels.N; c++)
+        for (int r = 0; r < n; r++)
+            for (int c = 0; c < n; c++)
                 userState[r][c] = 0;
 
         //redraw symbols after clearing
@@ -176,8 +189,8 @@ public class BoardUI
     public void setUserState(int[][] loaded)
     {
         //copy the saved 8x8 array into the current array
-        for (int r = 0; r < Levels.N; r++)
-            System.arraycopy(loaded[r], 0, userState[r], 0, Levels.N);
+        for (int r = 0; r < n; r++)
+            System.arraycopy(loaded[r], 0, userState[r], 0, n);
 
         //redraw symbols after loading
         renderSymbols();
