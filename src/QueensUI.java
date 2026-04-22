@@ -7,12 +7,15 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextInputDialog;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class QueensUI extends Application
@@ -72,7 +75,7 @@ public class QueensUI extends Application
         primaryStage = stage;
 
         //build and show the selector screen first
-        selectorScene = new Scene(buildSelectorRoot(), 520, 340);
+        selectorScene = new Scene(buildSelectorRoot(), 520, 800);
         primaryStage.setTitle("Queens - Level Select");
         primaryStage.setScene(selectorScene);
         primaryStage.show();
@@ -239,7 +242,75 @@ public class QueensUI extends Application
     //builds the selector for any custom levels that were made
     private void showCustomLevelSelector()
     {
-        System.out.println("Not implemented yet");
+        //load the custom levels from the custom levels file
+        ArrayList<CustomLevel> customLevels = ScoreSaver.loadCustomLevels();
+
+        //print out the levels
+        //title label at the top
+        Label title = new Label("Custom Levels");
+        title.setFont(Font.font(28));
+
+        //instructions label below the title
+        Label info = new Label("Choose a level to start the game.");
+        info.setFont(Font.font(14));
+
+        //create a grid pane that will hold levels
+        GridPane levels = new GridPane();
+        levels.setAlignment(Pos.CENTER);
+        levels.setHgap(10);
+        levels.setVgap(10);
+
+        //loop through each level and create a small vbox for each to store level button and best time
+        for (int i = 0; i < customLevels.size(); i++)
+        {
+            //create a button and a label
+            Button btnLevel = new Button("Level " + (i+1));
+            Label name = new Label(customLevels.get(i).creatorName);
+            Label lblTime = new Label();
+            //set best time to none
+            lblTime.setText("Best: N/A");
+            if (bestTimes.containsKey(i)) //if there is actually a time, set it to that.
+            {
+                lblTime.setText("Best: " + levelTimer.getElapsedTimeString(bestTimes.get(i)));
+            }
+
+            //set index variable because lambda doesn't like the i in the loop
+            int index = i;
+            //event handler for the button
+            btnLevel.setOnAction(_ -> System.out.println("Locad custom level " + index));
+
+            //button size
+            btnLevel.setPrefSize(80, 80);
+
+
+            VBox lvl = new VBox(btnLevel, name, lblTime); //create a VBox for each level and add the button and level to it
+            //set VBox alignment
+            lvl.setAlignment(Pos.CENTER);
+            levels.add(lvl, (i % 5), (i / 5)); //add the level to the grid.
+        }
+        //create a back button
+        Button back = new Button("Return to Menu");
+        back.setOnAction(_ -> showSelectorScreen());
+
+        //assemble the screen layout
+        VBox layout = new VBox(15);
+        layout.setAlignment(Pos.CENTER);
+        layout.setPadding(new Insets(20));
+
+        //if the custom levels are empty, display a message, if not, then show the levels and stuff
+        if (customLevels.isEmpty())
+        {
+            layout.getChildren().addAll(title, new Label("No custom levels yet"), back);
+        }
+        else
+        {
+            layout.getChildren().addAll(title, info, levels, back);
+        }
+
+        //show the scene
+        primaryStage.setTitle("Queens - Custom Levels");
+        primaryStage.setScene(new Scene(layout, 520, 800));
+        primaryStage.show();
     }//end showCustomLevelSelector
 
     //set up the JavaFX timer that refreshes the timer label
@@ -335,7 +406,8 @@ public class QueensUI extends Application
                 dialog.setContentText("Enter your name:");
 
                 dialog.showAndWait().ifPresent(name -> {
-                //todo: save custom level
+                CustomLevel level = new CustomLevel(name, customRegionMap.length, customRegionMap);
+                ScoreSaver.saveCustomLevel(level);
                 System.out.println("Saving level by: " + name);
             });
             }

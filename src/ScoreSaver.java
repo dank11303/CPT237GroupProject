@@ -1,9 +1,6 @@
 //imports (these let us read/write files and store data in a HashMap)
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.BufferedReader;
-import java.io.FileReader;
+import java.io.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 //this class will manage the best times file for the game.
@@ -194,4 +191,86 @@ public class ScoreSaver
             return null;
         }
     }
+
+    //these methods will be used to save and load custom levels
+    public static void saveCustomLevel(CustomLevel level)
+    {
+        //try to write data to a file
+        try(FileWriter writer = new FileWriter("customlevels.csv", true))
+        {
+            //header line for the custom levels csv
+            writer.write(level.creatorName + "," + level.n + "\n");
+
+            //write the region map
+            for (int[] row : level.regionMap)
+            {
+                for (int c = 0; c < level.n; c++)
+                {
+                    writer.write(row[c] + (c == level.n - 1? "" : ","));
+                }
+                writer.write("\n");
+            }
+
+            //write a delimiter to mark the end of each level
+            writer.write("---\n");
+        }
+        catch (Exception ex)
+        {
+            System.out.println("There was an issue saving a custom level");
+            System.out.println(ex.getMessage());
+        }//end try catch
+    }//end saveCustomLevel(CustomLevel)
+
+    public static ArrayList<CustomLevel> loadCustomLevels()
+    {
+        ArrayList<CustomLevel> levels = new ArrayList<CustomLevel>(); //create an array to store the levels
+
+        //check if the file even exists first.
+        File file = new File("customlevels.csv");
+        if (!file.exists()) return levels;
+
+        //create a reader and read each line and save each level to the array
+        try(BufferedReader reader = new BufferedReader(new FileReader("customlevels.csv")))
+        {
+            String line;
+            int index = 0;
+
+            while((line = reader.readLine()) != null)
+            {
+                //read the header, separate it, and get the name and row count
+                String[] parts = line.split(",");
+                String creatorName = parts[0];
+                int n = Integer.parseInt(parts[1]);
+
+                //read the following region map using the row count to keep track
+                int[][] regionMap = new int[n][n];
+                for (int r = 0; r < n; r++)
+                {
+                    //read the line
+                    String[] row = reader.readLine().split(",");
+                    for (int c = 0; c < n; c++)
+                    {
+                        //write each and every cell
+                        regionMap[r][c] = Integer.parseInt(row[c]);
+                    }
+                }
+
+                //read the level separator delimiter (---)
+                reader.readLine();
+
+                //create the level and assign an index
+                CustomLevel level = new CustomLevel(creatorName, n, regionMap);
+                level.index = index;
+                levels.add(level);
+                index++;
+            }//end while
+        }
+        catch (Exception ex)
+        {
+            System.out.println("There was an issue loading the custom levels");
+            System.out.println(ex.getMessage());
+        }//end catch
+
+        return levels;
+    }//end loadCustomLevels()
 }
