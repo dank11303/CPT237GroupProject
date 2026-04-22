@@ -21,6 +21,9 @@ public class GameScreenUI
     //label that shows if puzzle is solved or not
     private final Label puzzleCompleted = new Label("Not Checked");
 
+    //had to move this so I can disable the buttons. This is the horizontal box for all of the save slot buttons.
+    private final HBox slotsBar = new HBox(10);
+
     //constructor builds the entire game screen UI
     public GameScreenUI(HashMap<Integer, Long> bestTimes,
                         Timer timer,
@@ -72,7 +75,6 @@ public class GameScreenUI
         checkButton.setOnAction(_ -> onCheck.run());
 
         //save/load slot buttons bar (built in a loop to avoid repeated code)
-        HBox slotsBar = new HBox(10);
         slotsBar.setAlignment(Pos.CENTER_LEFT);
         slotsBar.setPadding(new Insets(5, 10, 5, 10));
 
@@ -124,5 +126,22 @@ public class GameScreenUI
     public Label getPuzzleCompletedLabel()
     {
         return puzzleCompleted;
+    }
+
+    //disables all save/load slots when playing a custom level
+    public void disableSlots()
+    {
+        //loop through all nodes and disable them
+        for (javafx.scene.Node node : slotsBar.getChildren())
+        {
+            node.setDisable(true);
+        }
+    }
+
+    //hide the level picker when playing a custom level
+    public void hideLevelPicker()
+    {
+        levelPicker.setVisible(false);
+        levelPicker.setManaged(false);
     }
 }

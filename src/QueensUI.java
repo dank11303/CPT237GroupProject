@@ -185,6 +185,13 @@ public class QueensUI extends Application
                 slot -> loadSlot(slot, gameUI.getPuzzleCompletedLabel())
         );
 
+        //check if the level being played is custom and disable stuff if it is
+        if (customRegionMap != null)
+        {
+            gameUI.disableSlots();
+            gameUI.hideLevelPicker();
+        }
+
         //start the JavaFX Timeline that updates the timer label
         setupClock();
 
