@@ -6,6 +6,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.animation.KeyFrame;
@@ -37,7 +38,7 @@ public class QueensUI extends Application
     //current level index (0 = Level 1)
     private int currentLevel = 0;
 
-    //the board UI (creates the 8x8 grid and stores the player's clicks)
+    //the board UI (creates the grid and stores the player's clicks)
     private BoardUI boardUI;
 
     //the game screen UI (top bar, buttons, slots, and where the board is shown)
@@ -53,9 +54,14 @@ public class QueensUI extends Application
         return boardUI == null ? new int[0][0] : boardUI.getUserState();
     }
 
+    //store a custom map when testing a new level that is null if no level is passed
+    private int[][] customRegionMap = null;
+
     //getter used by Logic.java to read the current level's region map (for region checking)
     public int[][] getCurrentLevelMap()
     {
+        if (customRegionMap != null) return customRegionMap; //if there's a custom level, return that instead of a regular level.
+        //  This happens when a custom level has been created and will be tested before adding to custom levels file.
         return Levels.LEVELS[currentLevel];
     }
 
@@ -141,7 +147,7 @@ public class QueensUI extends Application
         });
 
         //color the board for the current level (uses the region map)
-        boardUI.renderLevel(Levels.LEVELS[currentLevel]);
+        boardUI.renderLevel(getCurrentLevelMap());
 
         //create the game screen UI and connect its buttons to our methods
         gameUI = new GameScreenUI(
@@ -192,6 +198,9 @@ public class QueensUI extends Application
     //go back to selector screen
     private void showSelectorScreen()
     {
+        //clear any custom levels
+        customRegionMap = null;
+
         //stop the UI timer updates
         if (uiClock != null) uiClock.stop();
 
@@ -217,7 +226,8 @@ public class QueensUI extends Application
                 size,
                 this::showSizePicker, //back goes to the size picker
                 regionMap ->{
-                    //this will load the region map as a testable game level
+                    customRegionMap = regionMap;
+                    showGameScreen();
                 }
         );
 
@@ -303,15 +313,32 @@ public class QueensUI extends Application
             //stop label updater so time freezes on screen
             if (uiClock != null) uiClock.stop();
 
-            //save best time if this run is faster
-            long t = levelTimer.getElapsedMilliseconds();
-            if (!bestTimes.containsKey(currentLevel) || t < bestTimes.get(currentLevel))
+            //only save a best time if the level is built-in and not custom
+            if (customRegionMap == null)
             {
-                bestTimes.put(currentLevel, t);
-            }
+                //save best time if this run is faster
+                long t = levelTimer.getElapsedMilliseconds();
+                if (!bestTimes.containsKey(currentLevel) || t < bestTimes.get(currentLevel))
+                {
+                    bestTimes.put(currentLevel, t);
+                }
 
-            //save best times to scores.csv
-            ScoreSaver.saveBestTimes(bestTimes);
+                //save best times to scores.csv
+                ScoreSaver.saveBestTimes(bestTimes);
+            }
+            else
+            {
+                //have a dialog box pop up asking the user if they want to save the level
+                TextInputDialog dialog = new TextInputDialog();
+                dialog.setTitle("Save Level");
+                dialog.setHeaderText("Your puzzle is valid and you solved it!\nDo you want to save it?");
+                dialog.setContentText("Enter your name:");
+
+                dialog.showAndWait().ifPresent(name -> {
+                //todo: save custom level
+                System.out.println("Saving level by: " + name);
+            });
+            }
         }
         //if the puzzle is not solved
         else
