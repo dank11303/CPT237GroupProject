@@ -120,15 +120,20 @@ public class Levels
 
     //colors used for regions
     public static final Color[] PALETTE = {
-            Color.web("#b9a6e8"),
-            Color.web("#f6c28f"),
-            Color.web("#8fb6ff"),
-            Color.web("#a7df9f"),
-            Color.web("#d9b58e"),
-            Color.web("#e0e0e0"),
-            Color.web("#a8dfb0"),
-            Color.web("#f26c5f"),
-            Color.web("#f2e58c"),
-            Color.web("#cfcfcf")
+            Color.web("#b9a6e8"), //0 soft purple
+            Color.web("#f6c28f"), //1 soft orange
+            Color.web("#8fb6ff"), //2 soft blue
+            Color.web("#a7df9f"), //3 soft green
+            Color.web("#f26c5f"), //4 soft red
+            Color.web("#f2e58c"), //5 soft yellow
+            Color.web("#f7a8d0"), //6 soft pink
+            Color.web("#80d4d4"), //7 soft teal
+            Color.web("#d4a8f7"), //8 soft lavender
+            Color.web("#a8d4f7"), //9 soft sky blue
+            Color.web("#f7d4a8"), //10 soft peach
+            Color.web("#a8f7d4"), //11 soft mint
+            Color.web("#f7f7a8"), //12 soft cream yellow
+            Color.web("#c8a882"), //13 soft brown
+            Color.web("#a8c8f7")  //14 soft periwinkle
     };
 }
