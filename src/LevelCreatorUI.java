@@ -137,7 +137,7 @@ public class LevelCreatorUI
                 cell.setOnDragDetected(e -> cell.startFullDrag());
 
                 //when dragging enters this cell, apply the x state
-                cell.setOnMouseDragEntered(_ -> {
+                cell.setOnMouseDragEntered(e -> {
                     regionMap[rr][cc] = selectedColor;
                     cells[rr][cc].setBackground(new Background(new BackgroundFill(Levels.PALETTE[selectedColor], CornerRadii.EMPTY, Insets.EMPTY)));
                     testButton.setDisable(!checkAll());

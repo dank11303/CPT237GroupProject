@@ -128,7 +128,7 @@ public class BoardUI
                 cell.setOnDragDetected(e -> cell.startFullDrag());
 
                 //when dragging enters this cell, apply the x state
-                cell.setOnMouseDragEntered(_ -> {
+                cell.setOnMouseDragEntered(e -> {
                     userState[rr][cc] = 1;
                     renderSymbols();
                 });

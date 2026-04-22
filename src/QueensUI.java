@@ -1,3 +1,8 @@
+/*
+Team Members: David Lawrence, Daniel Kocsis
+Game: Queens
+ */
+
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -11,7 +16,6 @@ import javafx.stage.Stage;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -350,7 +354,7 @@ public class QueensUI extends Application
             //stop label updater so time freezes on screen
             if (uiClock != null) uiClock.stop();
 
-            //only save a best time if the level is built-in and not custom
+            //save a best time depending on the level type
             if (customRegionMap == null)
             {
                 // built-in level — save best time normally
