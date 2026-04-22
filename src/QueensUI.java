@@ -233,9 +233,6 @@ public class QueensUI extends Application
         //update level number
         currentLevel = newLevelIndex;
 
-        //clear the board
-        boardUI.clear();
-
         //re-color the board using the new level map
         boardUI.renderLevel(Levels.LEVELS[currentLevel]);
 
@@ -333,9 +330,9 @@ public class QueensUI extends Application
         //update dropdown selection
         gameUI.getLevelPicker().getSelectionModel().select(currentLevel);
 
-        //load board state and redraw colors
-        boardUI.setUserState(data.userState);
+        //redraw colors and load board state
         boardUI.renderLevel(Levels.LEVELS[currentLevel]);
+        boardUI.setUserState(data.userState);
 
         //load saved time and update label
         levelTimer.setElapsedMilliseconds(data.elapsedMs);
