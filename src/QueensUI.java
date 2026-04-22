@@ -1,7 +1,12 @@
 import javafx.application.Application;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.Parent;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -101,7 +106,9 @@ public class QueensUI extends Application
 
                     //switch to the game screen
                     showGameScreen();
-                }
+                },
+                this::showSizePicker,
+                this::showCustomLevelSelector
         );
 
         //return the root node for the selector screen
@@ -202,6 +209,28 @@ public class QueensUI extends Application
         primaryStage.setScene(selectorScene);
         primaryStage.show();
     }
+
+    //builds the level creator and swaps the scene to it
+    private void showLevelCreator(int size)
+    {
+        LevelCreatorUI creator = new LevelCreatorUI(
+                size,
+                this::showSizePicker, //back goes to the size picker
+                regionMap ->{
+                    //this will load the region map as a testable game level
+                }
+        );
+
+        primaryStage.setTitle("Queens - Level Creator");
+        primaryStage.setScene(new Scene(creator.getRoot(), 800, 900));
+        primaryStage.show();
+    }//end showLevelCreator
+
+    //builds the selector for any custom levels that were made
+    private void showCustomLevelSelector()
+    {
+        System.out.println("Not implemented yet");
+    }//end showCustomLevelSelector
 
     //set up the JavaFX timer that refreshes the timer label
     private void setupClock()
@@ -345,6 +374,40 @@ public class QueensUI extends Application
         //resume timer label updates
         if (uiClock != null) uiClock.play();
     }
+
+    //this shows a size picker for the level creator before loading the LevelCreatorUI
+    private void showSizePicker()
+    {
+        //combo box for the sizes
+        ComboBox<String> sizePicker = new ComboBox<>();
+        for (int i = 5; i <= 15; i++)
+        {
+            sizePicker.getItems().add(i + "x" + i);
+        }
+        sizePicker.getSelectionModel().select(0);
+
+        //button to create the level for the small selection screen
+        Button create = new Button("Create Level");
+        create.setOnAction(_ -> {
+            //get the selected size and add 5 to index to get the actual size
+            int size = 5 + sizePicker.getSelectionModel().getSelectedIndex();
+            showLevelCreator(size);
+        });
+
+        //cancel button to go back to level selector
+        Button cancel = new Button("Cancel");
+        cancel.setOnAction(_ -> showSelectorScreen());
+
+        //set up the window layout
+        VBox layout = new VBox(15, new Label("Choose board size:"), sizePicker, create, cancel);
+        layout.setAlignment(Pos.CENTER);
+        layout.setPadding(new Insets(20));
+
+        //set the scene
+        primaryStage.setTitle("Queens - Create Level");
+        primaryStage.setScene(new Scene(layout, 300, 200));
+        primaryStage.show();
+    }//end showSizePicker()
 
     public static void main(String[] args)
     {

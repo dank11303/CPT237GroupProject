@@ -22,7 +22,9 @@ public class LevelSelectorUI
                            Timer timer,
                            int levelCount,
                            IntConsumer onStartLevel,
-                           Consumer<ScoreSaver.SaveData> onLoadSlotData)
+                           Consumer<ScoreSaver.SaveData> onLoadSlotData,
+                           Runnable onCreateLevel,
+                           Runnable onCustomLevels)
     {
         //title label at the top
         Label title = new Label("Queens");
@@ -75,12 +77,25 @@ public class LevelSelectorUI
         HBox slots = new HBox(10, load1, load2, load3);
         slots.setAlignment(Pos.CENTER);
 
+        //buttons for custom level creator and custom level selector
+        Button levelCreator = new Button("Level Designer");
+        Button customLevelSelector = new Button("Custom Levels");
+        //put the buttons in an HBox and set styling
+        HBox customs = new HBox(10, levelCreator, customLevelSelector);
+        customs.setAlignment(Pos.CENTER);
+        customs.setMargin(levelCreator, new Insets(30, 5, 10, 10));
+        customs.setMargin(customLevelSelector, new Insets(30, 10, 10, 5));
+
+        //button event handlers
+        levelCreator.setOnAction(_ -> onCreateLevel.run());
+        customLevelSelector.setOnAction(_ -> onCustomLevels.run());
+
         //root layout settings
         root.setPadding(new Insets(20));
         root.setAlignment(Pos.CENTER);
 
         //add everything to the root VBox in order
-        root.getChildren().addAll(title, info, levels, slots, status);
+        root.getChildren().addAll(title, info, levels, slots, customs, status);
     }
 
     //creates a load slot button that tries to load slot#.csv
