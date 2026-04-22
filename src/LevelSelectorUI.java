@@ -1,7 +1,6 @@
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Button;
 import javafx.scene.layout.*;
@@ -30,71 +29,58 @@ public class LevelSelectorUI
         title.setFont(Font.font(28));
 
         //instructions label below the title
-        Label info = new Label("Choose a level and press Start Game.");
+        Label info = new Label("Choose a level to start the game.");
         info.setFont(Font.font(14));
 
-        //dropdown list for choosing a level
-        ComboBox<String> levelBox = new ComboBox<>();
+        //create a grid pane that will hold levels
+        GridPane levels = new GridPane();
+        levels.setAlignment(Pos.CENTER);
+        levels.setHgap(10);
+        levels.setVgap(10);
 
-        //fill dropdown with levels + best time if it exists
+        //loop through each level and create a small vbox for each to store level button and best time
         for (int i = 0; i < levelCount; i++)
         {
-            //bt is the extra text we add if the best time exists
-            String bt = "";
-
-            //if this level has the best time saved, show it
-            if (bestTimes.containsKey(i))
+            //create a button and a label
+            Button btnLevel = new Button("Level " + (i+1));
+            Label lblTime = new Label();
+            //set best time to none
+            lblTime.setText("Best: N/A");
+            if (bestTimes.containsKey(i)) //if there is actually a time, set it to that.
             {
-                bt = " (Best: " + timer.getElapsedTimeString(bestTimes.get(i)) + ")";
+                lblTime.setText("Best: " + timer.getElapsedTimeString(bestTimes.get(i)));
             }
 
-            //add the level name to the dropdown
-            levelBox.getItems().add("Level " + (i + 1) + bt);
+            //set index variable because lambda doesn't like the i in the loop
+            int index = i;
+            //event handler for the button
+            btnLevel.setOnAction(_ -> onStartLevel.accept(index));
+
+            //button size
+            btnLevel.setPrefSize(80, 80);
+
+
+            VBox lvl = new VBox(btnLevel, lblTime); //create a VBox for each level and add the button and level to it
+            //set VBox alignment
+            lvl.setAlignment(Pos.CENTER);
+            levels.add(lvl, (i % 5), (i / 5)); //add the level to the grid.
         }
-
-        //default selection (first level)
-        levelBox.getSelectionModel().select(0);
-
-        //start game button (middle column)
-        Button startGame = new Button("Start Game");
-
-        //when Start Game is clicked, send the selected level index back to QueensUI
-        startGame.setOnAction(_ -> {
-            //clear any old status message
-            status.setText("");
-
-            //tell QueensUI what level number was selected (0-based index)
-            onStartLevel.accept(levelBox.getSelectionModel().getSelectedIndex());
-        });
 
         //load slot buttons (right column)
         Button load1 = makeLoadButton(1, onLoadSlotData);
         Button load2 = makeLoadButton(2, onLoadSlotData);
         Button load3 = makeLoadButton(3, onLoadSlotData);
 
-        //left column (level selector)
-        VBox leftCol = new VBox(8, new Label("Level:"), levelBox);
-        leftCol.setAlignment(Pos.CENTER_LEFT);
-
-        //middle column (start button)
-        VBox midCol = new VBox(startGame);
-        midCol.setAlignment(Pos.CENTER);
-
-        //right column (slot buttons stacked)
-        VBox rightCol = new VBox(10, load1, load2, load3);
-        rightCol.setAlignment(Pos.CENTER_RIGHT);
-
-        //the main row layout (left / middle / right)
-        HBox row = new HBox(40, leftCol, midCol, rightCol);
-        row.setAlignment(Pos.CENTER);
-        row.setPadding(new Insets(10));
+        //bar for the slots
+        HBox slots = new HBox(10, load1, load2, load3);
+        slots.setAlignment(Pos.CENTER);
 
         //root layout settings
         root.setPadding(new Insets(20));
         root.setAlignment(Pos.CENTER);
 
         //add everything to the root VBox in order
-        root.getChildren().addAll(title, info, row, status);
+        root.getChildren().addAll(title, info, levels, slots, status);
     }
 
     //creates a load slot button that tries to load slot#.csv

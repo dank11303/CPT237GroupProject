@@ -192,7 +192,7 @@ public class QueensUI extends Application
         bestTimes = ScoreSaver.loadBestTimes();
 
         //rebuild selector screen so it updates best times on screen
-        selectorScene = new Scene(buildSelectorRoot(), 520, 340);
+        selectorScene = new Scene(buildSelectorRoot(), 520, 500);
 
         //reset timer display back to 0:00
         resetTimerUI();

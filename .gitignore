@@ -2,6 +2,9 @@
 /.idea/
 /out/
 
+#ignore the backup directory I made
+/Backups/
+
 #iml file
 *.iml
 
