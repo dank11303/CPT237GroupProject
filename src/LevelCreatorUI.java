@@ -132,6 +132,17 @@ public class LevelCreatorUI
                     testButton.setDisable(!checkAll()); //checks if all cells have been completed and enables the button once they are, and keeps it disabled if they aren't
                 });
 
+                //when the mouse is dragged over cells
+                //start full drag when user drags from a cell
+                cell.setOnDragDetected(e -> cell.startFullDrag());
+
+                //when dragging enters this cell, apply the x state
+                cell.setOnMouseDragEntered(_ -> {
+                    regionMap[rr][cc] = selectedColor;
+                    cells[rr][cc].setBackground(new Background(new BackgroundFill(Levels.PALETTE[selectedColor], CornerRadii.EMPTY, Insets.EMPTY)));
+                    testButton.setDisable(!checkAll());
+                });
+
                 //add the cell to the grid
                 grid.add(cell, c, r);
             }
