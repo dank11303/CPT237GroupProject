@@ -1,6 +1,10 @@
 /*
 Team Members: David Lawrence, Daniel Kocsis
+Assignment: Final Exam Project
 Game: Queens
+Course: CPT-237-W34 - Java Programming II
+Instructor: Theodore Richards
+Purpose: This application is a re-creation of the Queens puzzle game. It offers a few built-in levels and a custom level creator.
  */
 
 import javafx.application.Application;

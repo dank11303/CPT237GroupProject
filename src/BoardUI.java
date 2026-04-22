@@ -129,6 +129,14 @@ public class BoardUI
 
                 //when dragging enters this cell, apply the x state
                 cell.setOnMouseDragEntered(e -> {
+                    //fire the first-action callback only once (this starts the timer
+                    if (!firstActionFired)
+                    {
+                        //set the firstActionFired to true and run the firstAction if it isn't null. This starts the timer the same way as clicking
+                        firstActionFired = true;
+                        if (onFirstAction != null) onFirstAction.run();
+                    }
+                    //set the cells to 1 and render the symbols
                     userState[rr][cc] = 1;
                     renderSymbols();
                 });
