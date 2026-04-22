@@ -108,7 +108,6 @@ public class BoardUI
 
                 //when a cell is clicked
                 cell.setOnMouseClicked(_ -> {
-
                     //fire the first-action callback only once (starts timer)
                     if (!firstActionFired)
                     {
@@ -121,6 +120,16 @@ public class BoardUI
                     userState[rr][cc] = (userState[rr][cc] + 1) % 3;
 
                     //update the display after state changes
+                    renderSymbols();
+                });
+
+                //when the mouse is dragged over cells
+                //start full drag when user drags from a cell
+                cell.setOnDragDetected(e -> cell.startFullDrag());
+
+                //when dragging enters this cell, apply the x state
+                cell.setOnMouseDragEntered(_ -> {
+                    userState[rr][cc] = 1;
                     renderSymbols();
                 });
 
